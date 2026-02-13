@@ -1,6 +1,7 @@
+name: Hello World
+
 on:
   workflow_dispatch:
-
     inputs:
       name:
         description: 'Name'
@@ -9,14 +10,20 @@ on:
       age:
         description: 'Age'
         required: true
-        default: '21'
+        default: '20'
 jobs:
+  hello-world:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Hello World
+        run: echo "Hello World"
   recap:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
