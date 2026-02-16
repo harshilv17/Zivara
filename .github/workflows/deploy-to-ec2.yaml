@@ -3,7 +3,9 @@ name: Deploy to EC2
 on:
   push:
     branches:
-      - main   # triggers when you push to main
+      - main  # triggers when you push to main
+  workflow_dispatch:
+    
 
 jobs:
   deploy:
