@@ -3,7 +3,7 @@ resource "aws_eks_cluster" "main" {
   role_arn = aws_iam_role.eks_cluster_role.arn
 
   vpc_config {
-    subnet_ids = var.subnet_ids
+    subnet_ids = data.aws_subnets.selected.ids
   }
 
   depends_on = [
@@ -15,7 +15,7 @@ resource "aws_eks_node_group" "main" {
   cluster_name    = aws_eks_cluster.main.name
   node_group_name = "standard-nodes"
   node_role_arn   = aws_iam_role.eks_node_role.arn
-  subnet_ids      = var.subnet_ids
+  subnet_ids      = data.aws_subnets.selected.ids
 
   scaling_config {
     desired_size = 2

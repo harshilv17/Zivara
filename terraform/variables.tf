@@ -8,14 +8,8 @@ variable "project_name" {
   default     = "zivara"
 }
 
-variable "subnet_ids" {
-  description = "List of subnet IDs for EKS and ECS"
-  type        = list(string)
-  default     = ["subnet-xxxxxx", "subnet-yyyyyy"]
-}
-
 variable "vpc_id" {
   description = "VPC ID"
   type        = string
-  default     = "vpc-xxxxxx"
+  default     = "vpc-052a63be97f1d6ed8"
 }
