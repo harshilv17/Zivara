@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -16,7 +16,7 @@ interface Product {
   category: string;
 }
 
-export default function ShopPage() {
+function ShopContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [products, setProducts] = useState<Product[]>([]);
@@ -202,5 +202,30 @@ export default function ShopPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ShopPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-white py-12">
+        <div className="container mx-auto px-4">
+          <div className="animate-pulse">
+            <div className="h-10 bg-gray-200 rounded w-32 mb-8" />
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-6">
+              {[...Array(6)].map((_, i) => (
+                <div key={i}>
+                  <div className="aspect-[4/5] bg-gray-200 rounded-xl mb-4" />
+                  <div className="h-4 bg-gray-200 rounded w-3/4 mb-2" />
+                  <div className="h-4 bg-gray-200 rounded w-1/2" />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    }>
+      <ShopContent />
+    </Suspense>
   );
 }
