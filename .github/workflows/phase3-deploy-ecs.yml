@@ -1,0 +1,38 @@
+name: Phase 3 - ECS Deployment
+
+on:
+  workflow_run:
+    workflows: ["Phase 2 - Infrastructure"]
+    types:
+      - completed
+  workflow_dispatch:
+
+jobs:
+  deploy-ecs:
+    name: Build & Deploy to ECS
+    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build & Push Backend
+        working-directory: backend
+        run: |
+          docker build -t ${{ steps.login-ecr.outputs.registry }}/zivara-backend:latest .
+          docker push ${{ steps.login-ecr.outputs.registry }}/zivara-backend:latest
+
+      - name: Update ECS Service
+        run: |
+          aws ecs update-service --cluster zivara-ecs-cluster --service zivara-backend-service --force-new-deployment
