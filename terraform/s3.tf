@@ -1,9 +1,11 @@
+# S3 bucket for app assets — uses a fixed name to be idempotent
 resource "aws_s3_bucket" "app_assets" {
-  bucket = "${var.project_name}-assets-${random_id.bucket_id.hex}"
-}
+  bucket = "${var.project_name}-assets-bucket"
 
-resource "random_id" "bucket_id" {
-  byte_length = 4
+  # Prevent Terraform from destroying the bucket if it already exists
+  lifecycle {
+    prevent_destroy = false
+  }
 }
 
 resource "aws_s3_bucket_versioning" "assets_versioning" {
