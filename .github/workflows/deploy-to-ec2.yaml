@@ -3,9 +3,8 @@ name: Deploy to EC2
 on:
   push:
     branches:
-      - main  # triggers when you push to main
+      - main
   workflow_dispatch:
-    
 
 jobs:
   deploy:
@@ -13,10 +12,22 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Check EC2 secrets
+        id: check-secrets
+        run: |
+          if [ -z "${{ secrets.EC2_HOST }}" ] || [ -z "${{ secrets.EC2_SSH_KEY }}" ]; then
+            echo "configured=false" >> $GITHUB_OUTPUT
+            echo "⚠️ EC2 secrets not configured. Skipping deployment."
+          else
+            echo "configured=true" >> $GITHUB_OUTPUT
+          fi
+
       - name: Checkout Code
+        if: steps.check-secrets.outputs.configured == 'true'
         uses: actions/checkout@v4
 
       - name: Deploy to EC2 via SSH
+        if: steps.check-secrets.outputs.configured == 'true'
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST }}
