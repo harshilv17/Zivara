@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
 import dotenv from 'dotenv';
 import prisma from './lib/prisma';
 import productRoutes from './routes/productRoutes';
@@ -16,6 +17,7 @@ const app = express();
 const PORT = process.env.PORT || 4000;
 
 app.use(cors());
+app.use(helmet());
 app.use(express.json());
 
 // Basic health check
