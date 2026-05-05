@@ -1,0 +1,62 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: zivara-prod
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: zivara-backend
+  namespace: zivara-prod
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: zivara-backend
+  template:
+    metadata:
+      labels:
+        app: zivara-backend
+    spec:
+      containers:
+      - name: backend
+        image: REPLACE_WITH_ECR_URL:latest
+        ports:
+        - containerPort: 4000
+        resources:
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+          requests:
+            cpu: "250m"
+            memory: "256Mi"
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 4000
+          initialDelaySeconds: 15
+          periodSeconds: 20
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 4000
+          initialDelaySeconds: 5
+          periodSeconds: 10
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: zivara-backend-service
+  namespace: zivara-prod
+spec:
+  type: LoadBalancer
+  selector:
+    app: zivara-backend
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 4000
