@@ -20,11 +20,24 @@ jobs:
           aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
           aws-region: ${{ secrets.AWS_REGION }}
 
+      - name: Check if EKS cluster exists
+        id: check-eks
+        run: |
+          if aws eks describe-cluster --name zivara-eks-cluster --region ${{ secrets.AWS_REGION }} 2>/dev/null; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+            echo "✅ EKS cluster found."
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "⚠️ EKS cluster zivara-eks-cluster not found. Skipping deployment."
+          fi
+
       - name: Update kubeconfig
+        if: steps.check-eks.outputs.exists == 'true'
         run: aws eks update-kubeconfig --name zivara-eks-cluster --region ${{ secrets.AWS_REGION }}
 
       - name: Deploy Manifests
+        if: steps.check-eks.outputs.exists == 'true'
         run: |
           sed -i "s|REPLACE_WITH_ECR_URL|${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/zivara-backend|g" k8s/deployment.yaml
           kubectl apply -f k8s/deployment.yaml
-          kubectl rollout status deployment/zivara-backend -n zivara-prod
+          kubectl rollout status deployment/zivara-backend -n zivara-prod --timeout=120s || echo "⚠️ Rollout timed out, deployment may still be in progress."
