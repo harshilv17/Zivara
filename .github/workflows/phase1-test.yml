@@ -15,17 +15,16 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
 
       - name: Backend Tests
         working-directory: backend
         run: |
-          npm install
+          npm ci
           npx prisma generate
           npm test
 
       - name: Frontend Tests
         working-directory: frontend
         run: |
-          npm install
+          npm ci
           # npm test

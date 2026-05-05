@@ -1,16 +1,13 @@
 name: Phase 4 - EKS Deployment
 
 on:
-  workflow_run:
-    workflows: ["Phase 2 - Infrastructure"]
-    types:
-      - completed
+  push:
+    branches: [ main ]
   workflow_dispatch:
 
 jobs:
   deploy-eks:
     name: Deploy to EKS
-    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
