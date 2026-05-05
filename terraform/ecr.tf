@@ -1,9 +1,8 @@
-resource "aws_ecr_repository" "backend" {
-  name                 = "${var.project_name}-backend"
-  image_tag_mutability = "MUTABLE"
+# Use data sources to reference existing ECR repos (idempotent)
+data "aws_ecr_repository" "backend" {
+  name = "${var.project_name}-backend"
 }
 
-resource "aws_ecr_repository" "frontend" {
-  name                 = "${var.project_name}-frontend"
-  image_tag_mutability = "MUTABLE"
+data "aws_ecr_repository" "frontend" {
+  name = "${var.project_name}-frontend"
 }
