@@ -24,12 +24,35 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
+      - name: Check if ECR repo exists
+        id: check-ecr
+        run: |
+          if aws ecr describe-repositories --repository-names zivara-backend 2>/dev/null; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "⚠️ ECR repo zivara-backend not found. Skipping deployment."
+          fi
+
       - name: Build & Push Backend
+        if: steps.check-ecr.outputs.exists == 'true'
         working-directory: backend
         run: |
           docker build -t ${{ steps.login-ecr.outputs.registry }}/zivara-backend:latest .
           docker push ${{ steps.login-ecr.outputs.registry }}/zivara-backend:latest
 
+      - name: Check if ECS service exists
+        if: steps.check-ecr.outputs.exists == 'true'
+        id: check-ecs
+        run: |
+          if aws ecs describe-services --cluster zivara-ecs-cluster --services zivara-backend-service --query 'services[0].status' 2>/dev/null | grep -q ACTIVE; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "⚠️ ECS service not found or inactive. Skipping service update."
+          fi
+
       - name: Update ECS Service
+        if: steps.check-ecs.outputs.exists == 'true'
         run: |
           aws ecs update-service --cluster zivara-ecs-cluster --service zivara-backend-service --force-new-deployment
