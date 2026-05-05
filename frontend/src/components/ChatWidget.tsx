@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MessageCircle, X, Send, Minimize2 } from 'lucide-react';
 
@@ -38,13 +38,14 @@ export function ChatWidget() {
     },
   ]);
   const [inputValue, setInputValue] = useState('');
+  const msgIdRef = useRef(2);
 
   const sendMessage = (text: string) => {
     if (!text.trim()) return;
 
     // Add user message
     const userMessage: Message = {
-      id: Date.now(),
+      id: msgIdRef.current++,
       text,
       sender: 'user',
       timestamp: new Date(),
@@ -60,7 +61,7 @@ export function ChatWidget() {
       )?.[1] || botResponses.default;
 
       const botMessage: Message = {
-        id: Date.now() + 1,
+        id: msgIdRef.current++,
         text: response,
         sender: 'bot',
         timestamp: new Date(),
