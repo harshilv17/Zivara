@@ -23,17 +23,17 @@ jobs:
       - name: Check if EKS cluster exists
         id: check-eks
         run: |
-          if aws eks describe-cluster --name zivara-eks-cluster --region ${{ secrets.AWS_REGION }} 2>/dev/null; then
+          if aws eks describe-cluster --name extravagant-pop-badger --region ${{ secrets.AWS_REGION }} 2>/dev/null; then
             echo "exists=true" >> $GITHUB_OUTPUT
             echo "✅ EKS cluster found."
           else
             echo "exists=false" >> $GITHUB_OUTPUT
-            echo "⚠️ EKS cluster zivara-eks-cluster not found. Skipping deployment."
+            echo "⚠️ EKS cluster extravagant-pop-badger not found. Skipping deployment."
           fi
 
       - name: Update kubeconfig
         if: steps.check-eks.outputs.exists == 'true'
-        run: aws eks update-kubeconfig --name zivara-eks-cluster --region ${{ secrets.AWS_REGION }}
+        run: aws eks update-kubeconfig --name extravagant-pop-badger --region ${{ secrets.AWS_REGION }}
 
       - name: Deploy Manifests
         if: steps.check-eks.outputs.exists == 'true'
