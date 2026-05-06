@@ -3,6 +3,9 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
+# Install OpenSSL for Prisma
+RUN apk add --no-cache openssl
+
 COPY package*.json ./
 COPY prisma ./prisma/
 
@@ -16,6 +19,9 @@ FROM node:20-alpine
 
 WORKDIR /app
 
+# Install OpenSSL for Prisma runtime
+RUN apk add --no-cache openssl
+
 # Create non-root user
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 
@@ -23,6 +29,15 @@ COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/prisma ./prisma
+
+# Copy SQLite database
+COPY --from=builder /app/prisma/dev.db ./prisma/dev.db
+
+# Set environment variables
+ENV DATABASE_URL="file:./prisma/dev.db"
+ENV PORT=4000
+ENV JWT_SECRET="supersecret_zivara_key_123"
+ENV NODE_ENV=production
 
 # Change ownership
 RUN chown -R appuser:appgroup /app
